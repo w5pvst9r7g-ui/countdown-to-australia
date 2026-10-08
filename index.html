@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Counting down to the flight to Australia.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#101C45">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='-26 -26 52 52'%3E%3Ccircle r='26' fill='%23101C45'/%3E%3Cpath fill='%23FFF4E2' transform='rotate(-30)' d='M22 0 C22 -2 19 -3 14 -3 L4 -3 L-6 -18 L-11 -18 L-5 -3 L-14 -3 L-19 -9 L-23 -9 L-20 0 L-23 9 L-19 9 L-14 3 L-5 3 L-11 18 L-6 18 L4 3 L14 3 C19 3 22 2 22 0 Z'/%3E%3C/svg%3E">
+<title>Countdown to Australia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600&family=Lexend:wght@400;500&display=swap">
+<style>
+/* Layout: one screen of evening sky. Clocks along the top, the route arc in the middle,
+   the big timer under it, the fun fact last. A sunrise glow grows at the horizon as the day nears. */
+:root {
+  --night: #101C45;
+  --dusk: #2A2E6E;
+  --ember: #5A3877;
+  --dawn: #E8915A;
+  --paper: #FFF4E2;
+  --sun: #FFC56B;
+  --mint: #7FD8C4;
+  --haze: #B4BCE0;
+  --veil: rgba(16, 28, 69, .45);
+  --shade: rgba(16, 28, 69, .55);
+  --sky-low: var(--ember);
+  --glow: .3;
+  --display: "Fredoka", "Trebuchet MS", "Segoe UI", system-ui, sans-serif;
+  --text: "Lexend", "Segoe UI", system-ui, -apple-system, sans-serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; }
+body { margin: 0; }
+body {
+  background: var(--night);
+  color: var(--paper);
+  font-family: var(--text);
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+.sky {
+  position: fixed; inset: 0; z-index: 0;
+  background: linear-gradient(180deg, var(--night) 0%, var(--dusk) 58%, var(--sky-low) 100%);
+}
+.sky canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
+.glow {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 60%;
+  background: radial-gradient(120% 90% at 50% 112%, var(--dawn), transparent 70%);
+  opacity: var(--glow);
+}
+
+.stage {
+  position: relative; z-index: 1;
+  box-sizing: border-box;
+  min-height: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding-inline: max(16px, 4vw);
+  padding-block: clamp(12px, 3vh, 36px);
+  display: grid;
+  grid-template-rows: auto minmax(110px, 1fr) auto auto;
+  gap: clamp(8px, 2.4vh, 28px);
+}
+
+.clocks {
+  display: flex; justify-content: space-between; flex-wrap: wrap; gap: 4px 16px;
+  font-size: clamp(.8rem, 1.6vw, 1rem);
+  color: var(--haze);
+}
+.clocks p { margin: 0; }
+.clocks time { color: var(--paper); font-variant-numeric: tabular-nums; margin-left: .45em; }
+.clocks .qld { text-align: right; }
+
+.route { position: relative; min-height: 110px; }
+.route svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+.path-all { fill: none; stroke: var(--haze); stroke-opacity: .55; stroke-width: 3; stroke-dasharray: 1 14; stroke-linecap: round; }
+.path-done { fill: none; stroke: var(--mint); stroke-width: 5; stroke-linecap: round; }
+.pin-home { fill: var(--mint); }
+.pin-away { fill: var(--sun); }
+.place { fill: var(--haze); font-family: var(--text); font-size: 30px; }
+.plane-body { fill: var(--paper); }
+.bob { animation: bob 3.8s ease-in-out infinite; }
+@keyframes bob { 50% { transform: translateY(-5px); } }
+
+.count { text-align: center; text-shadow: 0 1px 14px var(--shade); }
+h1 {
+  margin: 0 0 .35em;
+  font-family: var(--display); font-weight: 500;
+  font-size: clamp(1.1rem, 3.2vw, 2rem);
+  color: var(--haze);
+  text-wrap: balance;
+}
+.timer {
+  display: flex; justify-content: center; align-items: flex-start;
+  gap: .36em;
+  font-family: var(--display); font-weight: 600;
+  font-size: clamp(2.6rem, min(11vw, 19vh), 9rem);
+  line-height: 1;
+}
+.unit { display: flex; flex-direction: column; align-items: center; }
+.num { display: flex; align-items: baseline; }
+.d { display: inline-block; width: .6em; text-align: center; }
+.dot { display: inline-block; width: .28em; text-align: center; color: var(--sun); font-size: .5em; }
+.hund { display: flex; font-size: .5em; color: var(--sun); }
+.lbl {
+  margin-top: .55em;
+  font-family: var(--text); font-weight: 400;
+  font-size: clamp(.72rem, 1.5vw, 1rem);
+  letter-spacing: .02em;
+  color: var(--haze);
+}
+
+.fun {
+  margin: 0 auto;
+  max-width: 44ch;
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .4em .8em;
+  text-align: center;
+  font-size: clamp(.95rem, 2vw, 1.3rem);
+  line-height: 1.45;
+  text-wrap: balance;
+  text-shadow: 0 1px 12px var(--shade);
+}
+.fun button {
+  font: inherit; font-size: .8em;
+  color: var(--mint);
+  background: var(--veil);
+  border: 1.5px solid var(--mint);
+  text-shadow: none;
+  border-radius: 999px;
+  padding: .2em .85em;
+  cursor: pointer;
+}
+.fun button:hover { color: var(--night); background: var(--mint); }
+.fun button:focus-visible { outline: 2px solid var(--sun); outline-offset: 3px; }
+
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+.is-off h1 { font-size: clamp(3rem, min(13vw, 22vh), 10rem); color: var(--paper); font-weight: 600; margin: 0; }
+.is-off .timer, .is-off .fun button { display: none; }
+
+@media (max-height: 520px) and (orientation: landscape) {
+  .stage { grid-template-rows: auto minmax(70px, 1fr) auto auto; gap: 6px; }
+  h1 { margin-bottom: .2em; }
+}
+/* Narrow portrait: stack the four groups two by two so the digits can be twice the size. */
+@media (orientation: portrait) and (max-width: 600px) {
+  .timer {
+    display: grid; grid-template-columns: auto auto; justify-content: center;
+    gap: .22em .5em;
+    font-size: min(19vw, 11vh);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bob { animation: none; }
+}
+</style>
+</head>
+<body>
+<div class="sky" aria-hidden="true"><canvas id="stars"></canvas><div class="glow"></div></div>
+
+<main class="stage" id="stage">
+  <div class="clocks">
+    <p>Ireland <time id="irl"></time></p>
+    <p class="qld">Queensland <time id="qld"></time></p>
+  </div>
+
+  <div class="route">
+    <svg viewBox="0 0 1000 360" preserveAspectRatio="xMidYMid meet" role="img" aria-label="A plane on its way from Ireland to Queensland">
+      <path id="route" class="path-all" d="M110 290 Q500 -40 890 290"/>
+      <path id="trail" class="path-done" d="M110 290 Q500 -40 890 290"/>
+      <circle class="pin-home" cx="110" cy="290" r="9"/>
+      <circle class="pin-away" cx="890" cy="290" r="9"/>
+      <text class="place" x="110" y="338" text-anchor="middle">Ireland</text>
+      <text class="place" x="890" y="338" text-anchor="middle">Queensland</text>
+      <g id="plane"><g class="bob"><path class="plane-body" transform="scale(1.7)"
+        d="M22 0 C22 -2 19 -3 14 -3 L4 -3 L-6 -18 L-11 -18 L-5 -3 L-14 -3 L-19 -9 L-23 -9 L-20 0 L-23 9 L-19 9 L-14 3 L-5 3 L-11 18 L-6 18 L4 3 L14 3 C19 3 22 2 22 0 Z"/></g></g>
+    </svg>
+  </div>
+
+  <section class="count">
+    <h1 id="headline">Off to Australia in</h1>
+    <div class="timer" aria-hidden="true">
+      <div class="unit"><div class="num" id="days"></div><div class="lbl" id="days-l">days</div></div>
+      <div class="unit"><div class="num" id="hours"></div><div class="lbl" id="hours-l">hours</div></div>
+      <div class="unit"><div class="num" id="mins"></div><div class="lbl" id="mins-l">minutes</div></div>
+      <div class="unit">
+        <div class="num"><span id="secs" class="num"></span><span class="dot">.</span><span id="hund" class="hund"></span></div>
+        <div class="lbl" id="secs-l">seconds</div>
+      </div>
+    </div>
+    <p class="sr" id="sr-time"></p>
+  </section>
+
+  <p class="fun"><span id="fun"></span> <button type="button" id="shuffle">Another one</button></p>
+</main>
+
+<script>
+// The moment the plane leaves, in Irish time. Ireland is on summer time (UTC+1) until 25 Oct.
+// If the flight moves, change this one line.
+const DEPARTURE = Date.parse('2026-10-23T20:35:00+01:00');
+
+// Where the little plane starts on the arc. Only affects the picture, not the countdown.
+const JOURNEY_START = Date.parse('2026-10-08T00:00:00+01:00');
+
+const SEC = 1000, MIN = 60 * SEC, HOUR = 60 * MIN, DAY = 24 * HOUR;
+const $ = id => document.getElementById(id);
+
+// ---------- digits ----------
+function setDigits(el, str) {
+  if (el.children.length !== str.length) {
+    el.textContent = '';
+    for (const ch of str) {
+      const s = document.createElement('span');
+      s.className = 'd';
+      el.appendChild(s);
+    }
+  }
+  for (let i = 0; i < str.length; i++) {
+    if (el.children[i].textContent !== str[i]) el.children[i].textContent = str[i];
+  }
+}
+const pad = n => String(n).padStart(2, '0');
+function setLabel(id, n, one, many) {
+  const t = n === 1 ? one : many;
+  const el = $(id);
+  if (el.textContent !== t) el.textContent = t;
+}
+
+// ---------- calendar helpers (Irish dates) ----------
+const dublinDay = new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/Dublin', year: 'numeric', month: '2-digit', day: '2-digit' });
+function dayNumber(ms) {
+  const [y, m, d] = dublinDay.format(ms).split('-').map(Number);
+  return Date.UTC(y, m - 1, d) / DAY;
+}
+function sleepsLeft(now) { return dayNumber(DEPARTURE) - dayNumber(now); }
+function weekendsLeft(now) {
+  let n = 0;
+  for (let d = dayNumber(now); d < dayNumber(DEPARTURE); d++) {
+    if (new Date(d * DAY).getUTCDay() === 6) n++;
+  }
+  return n;
+}
+
+// ---------- "that's about..." ----------
+// Honest rounding: halves under 10, whole numbers under 100, two significant figures above.
+function about(x) {
+  if (!(x >= 2)) return null;
+  const v = x < 10 ? Math.round(x * 2) / 2 : x < 100 ? Math.round(x) : Number(x.toPrecision(2));
+  return v.toLocaleString('en-IE');
+}
+const per = (unit, say) => r => { const a = about(r / unit); return a && say(a); };
+const rate = (perMs, say) => r => { const a = about(r * perMs); return a && say(a); };
+
+const FUN = [
+  per(22 * MIN, n => `That's about ${n} episodes of Pokémon.`),
+  per(7 * MIN, n => `That's about ${n} episodes of Bluey.`),
+  per(5 * MIN, n => `That's about ${n} episodes of Peppa Pig.`),
+  per(102 * MIN, n => `You could watch Frozen about ${n} times.`),
+  per(107 * MIN, n => `You could watch Moana about ${n} times.`),
+  per(81 * MIN, n => `You could watch Toy Story about ${n} times.`),
+  per(88 * MIN, n => `You could watch The Lion King about ${n} times.`),
+  per(102 * MIN, n => `You could watch Encanto about ${n} times.`),
+  per(95 * MIN, n => `You could watch Paddington about ${n} times.`),
+  per(86 * MIN, n => `You could watch My Neighbour Totoro about ${n} times.`),
+  per(1179 * MIN, n => `You could watch all eight Harry Potter films back to back about ${n} times.`),
+  per(224 * SEC, n => `You could sing Let It Go about ${n} times.`),
+  per(20 * SEC, n => `You could sing Happy Birthday about ${n} times.`),
+  per(2 * MIN, n => `That's about ${n} two-minute tooth brushes.`),
+  per(6 * MIN, n => `You could soft-boil about ${n} eggs, one after another.`),
+  per(3 * MIN, n => `You could pop about ${n} bags of popcorn, one at a time.`),
+  per(10 * MIN, n => `That's about ${n} ten-minute bedtime stories.`),
+  per(20 * MIN, n => `You could play about ${n} games of Snakes and Ladders.`),
+  per(2 * MIN, n => `That's about ${n} two-minute Mario Kart races.`),
+  per(90 * MIN, n => `That's about ${n} football matches.`),
+  per(70 * MIN, n => `That's about ${n} hurling matches.`),
+  per(80 * MIN, n => `That's about ${n} rugby matches.`),
+  per(4.8 * MIN, n => `You could walk about ${n} laps of a running track.`),
+  per(92.7 * MIN, n => `The International Space Station will fly around the Earth about ${n} times.`),
+  per(76 * HOUR, n => `That's long enough to fly to the Moon about ${n} times, like Apollo 11.`),
+  per(48 * HOUR, n => `You could fly to Australia and back about ${n} times.`),
+  per(499 * SEC, n => `Sunlight could travel from the Sun to the Earth about ${n} times.`),
+  rate(90 / MIN, n => `Your heart will beat about ${n} times.`),
+  rate(50 / SEC, n => `A hummingbird would flap its wings about ${n} times.`),
+  rate(1 / SEC, n => `That's about ${n} seconds. Start counting!`),
+  rate(25 / HOUR, n => `A kangaroo hopping without a rest could go about ${n} km.`),
+  rate(107000 / 1e6 / HOUR, n => `The Earth will zoom about ${n} million km around the Sun.`),
+  r => {
+    const m = r * 3.6 / HOUR;  // a garden snail manages about a millimetre a second
+    if (m >= 2000) return `A garden snail could crawl about ${about(m / 1000)} km.`;
+    const a = about(m);
+    return a && `A garden snail could crawl about ${a} metres.`;
+  },
+  r => {
+    const n = sleepsLeft(DEPARTURE - r);
+    return n > 1 ? `Only ${n} more sleeps!` : n === 1 ? 'Just one more sleep!' : null;
+  },
+  r => {
+    const n = weekendsLeft(DEPARTURE - r);
+    return n > 1 ? `Only ${n} more weekends.` : n === 1 ? 'Just one more weekend.' : null;
+  },
+];
+
+let funIndex = -1;
+function shuffleFun(r) {
+  const ok = FUN.map((f, i) => [i, f(r)]).filter(([i, s]) => s && i !== funIndex);
+  if (!ok.length) return;
+  funIndex = ok[Math.floor(Math.random() * ok.length)][0];
+  renderFun(r);
+}
+function renderFun(r) {
+  const s = funIndex >= 0 && FUN[funIndex](r);
+  if (!s) return shuffleFun(r);
+  if ($('fun').textContent !== s) $('fun').textContent = s;
+}
+
+// ---------- clocks ----------
+const clock = tz => new Intl.DateTimeFormat('en-AU', { timeZone: tz, weekday: 'short', hour: 'numeric', minute: '2-digit', hour12: true });
+const irl = clock('Europe/Dublin'), qld = clock('Australia/Brisbane');
+
+// ---------- sky and plane ----------
+const css = getComputedStyle(document.documentElement);
+const hex = v => { const h = v.trim().replace('#', ''); return [0, 2, 4].map(i => parseInt(h.slice(i, i + 2), 16)); };
+const EMBER = hex(css.getPropertyValue('--ember')), DAWN = hex(css.getPropertyValue('--dawn'));
+const route = $('route'), trail = $('trail'), plane = $('plane');
+const LEN = route.getTotalLength();
+
+function drawJourney(p) {
+  const root = document.documentElement.style;
+  const k = Math.pow(p, 1.4);
+  const c = EMBER.map((a, i) => Math.round(a + (DAWN[i] - a) * k));
+  root.setProperty('--sky-low', `rgb(${c.join(',')})`);
+  root.setProperty('--glow', (0.22 + 0.45 * k).toFixed(3));
+
+  const at = LEN * p;
+  trail.style.strokeDasharray = `${at} ${LEN}`;
+  const pt = route.getPointAtLength(at);
+  const a = route.getPointAtLength(Math.max(0, at - 1)), b = route.getPointAtLength(Math.min(LEN, at + 1));
+  const ang = Math.atan2(b.y - a.y, b.x - a.x) * 180 / Math.PI;
+  plane.setAttribute('transform', `translate(${pt.x.toFixed(1)} ${pt.y.toFixed(1)}) rotate(${ang.toFixed(1)})`);
+}
+
+function drawStars() {
+  const cv = $('stars'), dpr = Math.min(window.devicePixelRatio || 1, 2);
+  const w = cv.clientWidth, h = cv.clientHeight;
+  cv.width = w * dpr; cv.height = h * dpr;
+  const g = cv.getContext('2d');
+  g.scale(dpr, dpr);
+  const n = Math.round(w * h / 5000);
+  for (let i = 0; i < n; i++) {
+    const y = Math.pow(Math.random(), 1.6) * h * 0.85;   // thicker overhead, thinning toward the glow
+    const x = Math.random() * w;
+    const r = 0.35 + Math.random() * Math.random() * 1.3;
+    g.globalAlpha = (0.25 + Math.random() * 0.7) * (1 - y / h);
+    g.fillStyle = '#FFF4E2';
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+}
+
+// ---------- ticking ----------
+const stage = $('stage');
+let off = false;
+
+function everySecond() {
+  const now = Date.now();
+  const r = Math.max(0, DEPARTURE - now);
+  $('irl').textContent = irl.format(now);
+  $('qld').textContent = qld.format(now);
+  const p = Math.min(1, Math.max(0, (now - JOURNEY_START) / (DEPARTURE - JOURNEY_START)));
+  drawJourney(p);
+  if (r === 0) return goOff();
+  renderFun(r);
+  const d = Math.floor(r / DAY), h = Math.floor(r % DAY / HOUR), m = Math.floor(r % HOUR / MIN);
+  $('sr-time').textContent = `${d} days, ${h} hours and ${m} minutes to go.`;
+}
+
+function goOff() {
+  if (off) return;
+  off = true;
+  stage.classList.add('is-off');
+  $('headline').textContent = "We're off!";
+  $('fun').textContent = 'Next stop, Australia.';
+  $('sr-time').textContent = '';
+}
+
+function frame() {
+  const r = DEPARTURE - Date.now();
+  if (r <= 0) { goOff(); return; }
+  const d = Math.floor(r / DAY), h = Math.floor(r % DAY / HOUR), m = Math.floor(r % HOUR / MIN);
+  const s = Math.floor(r % MIN / SEC), cs = Math.floor(r % SEC / 10);
+  setDigits($('days'), pad(d)); setLabel('days-l', d, 'day', 'days');
+  setDigits($('hours'), pad(h)); setLabel('hours-l', h, 'hour', 'hours');
+  setDigits($('mins'), pad(m)); setLabel('mins-l', m, 'minute', 'minutes');
+  setDigits($('secs'), pad(s)); setLabel('secs-l', s, 'second', 'seconds');
+  setDigits($('hund'), pad(cs));
+  requestAnimationFrame(frame);
+}
+
+$('shuffle').addEventListener('click', () => shuffleFun(Math.max(0, DEPARTURE - Date.now())));
+
+// Keep a tablet's screen awake while the countdown is showing, where the browser allows it.
+async function stayAwake() {
+  try { if (navigator.wakeLock && document.visibilityState === 'visible') await navigator.wakeLock.request('screen'); } catch (e) {}
+}
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') stayAwake();
+});
+
+let resizeTimer;
+window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(drawStars, 150); });
+
+drawStars();
+everySecond();
+frame();
+setInterval(everySecond, 1000);
+stayAwake();
+</script>
+</body>
+</html>
